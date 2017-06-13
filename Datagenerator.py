@@ -12,6 +12,9 @@ class ImageDataGenerator:
         self.scale_size = scale_size
         self.pointer = 0
         self.n_class = n_class
+        self.read_class_list(class_list)
+        if shuffle:
+            self.shuffle_data()
 
     def read_class_list(self,class_list):
         with open(class_list) as f:
@@ -44,9 +47,12 @@ class ImageDataGenerator:
         labels = self.labels[self.pointer:self.pointer+self.batch_size]
         self.pointer += self.batch_size
         
-        images = np.array([self.batch_size,self.scale_size[0],self.scale_size[1],3])
+        images = np.ndarray([self.batch_size,self.scale_size[0],self.scale_size[1],3])
         for i in range(len(paths)):
             image = cv2.imread(paths[i])
+            #print ('file name is {}'.format(paths[i]))
+            #cv2.imshow(paths[i],image)
+            #cv2.waitKey(0)
             if self.horizontal and np.random.random()<0.5:
                 image = cv2.flip(image,1)
             image = cv2.resize(image,(self.scale_size[0],self.scale_size[1]))
@@ -56,7 +62,6 @@ class ImageDataGenerator:
             images[i] = image
 
         one_hot_labels = np.zeros((self.batch_size,self.n_class))
-        for i in range(labels):
-            one_hot_labels[i][labels[i]] = 1
-
+        for i in range(len(labels)):
+            one_hot_labels[i][int(labels[i])] = 1
         return images,one_hot_labels
